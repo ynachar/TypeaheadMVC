@@ -1,0 +1,100 @@
+﻿@model TypeAheadControl.Models.Patient
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css" />
+
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#InputString").autocomplete({
+            source: function (request, response) {
+                $.ajax({
+                    url: "/Home/Index",
+                    type: "POST",
+                    dataType: "json",
+                    data: { userInput: request.term },
+                    success: function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                id: item.Id,
+                                dob: item.DOB,
+                                phonenumber: item.PhoneNumber,
+                                firstname: item.FirstName,
+                                lastname: item.LastName,
+                                label: item.FirstName + " " + item.LastName,
+                                value: item.FirstName + " " + item.LastName
+                            };
+                        }))
+                    }
+                })
+            },
+            select: function (event, ui) {
+                $("#lblId").html(ui.item.id);
+                $("#lblFirstName").html(ui.item.firstname);
+                $("#lblLastName").html(ui.item.lastname);
+                $("#lblDob").html(ui.item.dob);
+                $("#lblPhoneNumber").html(ui.item.phonenumber);
+            },
+            minLength: 2
+        });        
+    })
+
+    function ClearForm() {
+        $('#InputString').val("");
+    
+        $("span").each(function () {
+            $(this).html("");
+        });
+    }
+
+</script>
+
+<style>
+    .container {
+        font-weight: bold;
+    }
+    .container span{
+        font-weight: normal;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    <div class="form-group">
+        <div class="row">
+            <h2>Typeahead Patients Control</h2>
+            <hr />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                @Html.EditorFor(model => model.InputString, 
+                                new { htmlAttributes = new { @class = "form-control", required="required"} })
+                <br />
+                <input type="button" id="btnClear" class="btn-default" value="Clear" onclick="ClearForm()" />
+            </div>
+            <hr />
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="container">
+                    <div class="col-xs-12">
+                        Patient ID: <span id="lblId"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        First Name: <span id="lblFirstName"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        Last Name: <span id="lblLastName"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        DOB: <span id="lblDob"></span>
+                    </div>
+                    <div class="col-xs-6">
+                        Phone Number: <span id="lblPhoneNumber"></span>
+                    </div>
+                </div>                    
+            </div>
+        </div>
+    </div>
+}
